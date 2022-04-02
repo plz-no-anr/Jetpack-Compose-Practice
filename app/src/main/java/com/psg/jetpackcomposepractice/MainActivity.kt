@@ -9,25 +9,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.psg.jetpackcomposepractice.ui.theme.JetpackComposePracticeTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +51,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Column, Row, Text
+ */
 //@Preview(showBackground = true)
 @Composable
 fun Test1() {
@@ -77,6 +78,9 @@ fun Test1() {
     }
 }
 
+/**
+ * Box
+ */
 //@Preview(showBackground = true)
 @Composable
 fun Test2() {
@@ -100,6 +104,9 @@ fun Test2() {
     }
 }
 
+/**
+ * 리스트, LazyColumn
+ */
 //@Preview(showBackground = true)
 @Composable
 fun Test3() {
@@ -124,6 +131,9 @@ fun Test3() {
     }
 }
 
+/**
+ * Image, Card, 상태
+ */
 //@Preview(showBackground = true)
 @Composable
 fun Test4(
@@ -168,3 +178,51 @@ fun Test4(
         }
     }
 }
+
+/**
+ * Scaffold, TextField, Button, 구조분해, SnackBar, 코루틴 스코프
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Preview
+@Composable
+fun Test5() {
+    val (text, setValue) = remember {
+        mutableStateOf("")
+    }
+
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Scaffold( // 머트리얼 디자인에서 스낵바등을 사용할때 사용
+        scaffoldState = scaffoldState
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            TextField( // EditText
+//            value = textValue.value,
+//            onValueChange = {
+//                textValue.value = it
+//            })
+                value = text,
+                onValueChange = setValue,
+            )
+            Button(onClick = {
+                keyboardController?.hide() // 키보드 숨김
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("Hello $text") // suspend 함수
+                }
+
+            }) {
+                Text("클릭!!")
+            }
+        }
+
+    }
+
+}
+
