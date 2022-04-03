@@ -24,6 +24,10 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.psg.jetpackcomposepractice.ui.theme.JetpackComposePracticeTheme
 import kotlinx.coroutines.launch
 
@@ -183,7 +187,7 @@ fun Test4(
  * Scaffold, TextField, Button, 구조분해, SnackBar, 코루틴 스코프
  */
 @OptIn(ExperimentalComposeUiApi::class)
-@Preview
+//@Preview
 @Composable
 fun Test5() {
     val (text, setValue) = remember {
@@ -193,7 +197,7 @@ fun Test5() {
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
 
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboardController = LocalSoftwareKeyboardController.current // 키보드 컨트롤러 객체
 
     Scaffold( // 머트리얼 디자인에서 스낵바등을 사용할때 사용
         scaffoldState = scaffoldState
@@ -203,7 +207,8 @@ fun Test5() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TextField( // EditText
+            TextField(
+                // EditText
 //            value = textValue.value,
 //            onValueChange = {
 //                textValue.value = it
@@ -224,5 +229,97 @@ fun Test5() {
 
     }
 
+}
+
+/**
+ * Navigation
+ */
+@Preview
+@Composable
+fun Test6() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "first"
+    ) {
+        composable("first") {
+            FirstScreen(navController)
+        }
+        composable("second") {
+            SecondScreen(navController)
+        }
+        composable("third/{value}") { backStackEntry -> // 넘겨받을 value
+            ThirdScreen(
+                navController,
+                backStackEntry.arguments?.getString("value") ?: ""
+            )
+        }
+    }
+
+}
+
+@Composable
+fun FirstScreen(navController: NavController) {
+    val (value, setValue) = remember {
+        mutableStateOf("")
+    }
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "첫 화면")
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            navController.navigate("second") // 화면 전환
+        }) {
+            Text(text = "두 번째!")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        TextField(value = value, onValueChange = setValue)
+        Button(onClick = {
+            if (value.isNotEmpty())
+                navController.navigate("third/$value")
+        }) {
+            Text(text = "세 번째!")
+        }
+    }
+}
+
+@Composable
+fun SecondScreen(navController: NavController) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "두 번째 화면")
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            navController.navigateUp()
+//            navController.popBackStack() // 위의 함수와 비슷한 동작작
+        }) {
+            Text(text = "뒤로 가기!")
+        }
+    }
+}
+
+@Composable
+fun ThirdScreen(navController: NavController, value: String) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "세 번째 화면")
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(value)
+        Button(onClick = {
+
+            navController.navigateUp()
+        }) {
+            Text(text = "뒤로 가기!")
+        }
+    }
 }
 
