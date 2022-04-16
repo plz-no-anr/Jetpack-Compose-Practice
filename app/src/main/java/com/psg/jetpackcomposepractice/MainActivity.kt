@@ -3,6 +3,7 @@ package com.psg.jetpackcomposepractice
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -24,6 +25,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,12 +36,16 @@ import com.psg.jetpackcomposepractice.ui.theme.JetpackComposePracticeTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+//    private val viewModel by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { // Compose가 시작되는 부분
             var isFavorite by rememberSaveable { // rememberSaveable 생명주기가 다시 돌아도 데이터를 보존
                 mutableStateOf(false)
             }
+
+            val viewModel = viewModel<MainViewModel>()
+
             JetpackComposePracticeTheme {
                 // A surface container using the 'background' color from the theme
 //                    Test1()
@@ -50,6 +58,23 @@ class MainActivity : ComponentActivity() {
                 ) { favorite -> // 콜백함수
                     isFavorite = favorite
                 }
+
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        viewModel.data.value,
+                        fontSize = 30.sp,
+                    )
+                    Button(onClick = {
+                        viewModel.changeValue()
+                    }) {
+                        Text(text = "변경")
+
+                    }
+
             }
         }
     }
@@ -234,7 +259,7 @@ fun Test5() {
 /**
  * Navigation
  */
-@Preview
+//@Preview
 @Composable
 fun Test6() {
     val navController = rememberNavController()
@@ -321,5 +346,39 @@ fun ThirdScreen(navController: NavController, value: String) {
             Text(text = "뒤로 가기!")
         }
     }
+}
+
+@Preview
+@Composable
+fun Test7(){
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            viewModel.data.value,
+            fontSize = 30.sp,
+        )
+        Button(onClick = {
+            viewModel.data.value = "World"
+        }) {
+            Text(text = "변경")
+
+        }
+    }
+
+}
+
+class MainViewModel : ViewModel() {
+    private val _data = mutableStateOf("Hello")
+    val data: State<String> = _data
+
+    fun changeValue(){
+        _data.value = "World"
+
+    }    }
+
 }
 
